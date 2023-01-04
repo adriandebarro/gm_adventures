@@ -6,7 +6,7 @@ var _down = keyboard_check(vk_down);
 var _shift = keyboard_check(vk_lshift);
 var _space = keyboard_check_released(vk_space);
 
-var _lmb = mouse_check_button_pressed(mb_left);
+var _lmb = mouse_check_button_released(mb_left);
 
 
 var _inputX = _right - _left;
@@ -16,10 +16,24 @@ moveX = _inputX * (_shift? slideSpeed : moveSpeed);
 moveY = _inputY * (_shift? slideSpeed : moveSpeed);
 
 
-if(_lmb)
+if(_lmb && !bowAttackIP)
 {
-	draw_lightning(x, y, mouse_x, mouse_y, 5, 10, 4, 9);	
+	bowAttackIP = true;
+	sprite_index = sprite_player_bow_attack;
+	current_animation_frame_index = 0;
 }
+else if(bowAttackIP && current_animation_frame_index < sprite_get_number(sprite_index))
+{
+	current_animation_frame_index++;
+}
+else
+{
+	sprite_index = sprite_player_idle;	
+	bowAttacklIP = false;
+}
+
+
+
 
 if(_space && currentState != PlayerState.Attack)
 {
@@ -32,17 +46,19 @@ else if(currentState == PlayerState.Attack && current_animation_frame_index < sp
 {
 	current_animation_frame_index++;
 }
-else if(moveX != 0 || moveY != 0)
+else
+{
+	sprite_index = sprite_player_idle;	
+	currentState = PlayerState.Idle;
+}
+
+
+if(moveX != 0 || moveY != 0)
 {
 	if(_shift)
 		sprite_index = sprite_player_slide;
 	else
 		sprite_index = sprite_player_run;
-}
-else
-{
-	currentState = PlayerState.Idle;
-	sprite_index = sprite_player_idle;	
 }
 
 var xDirSign = sign(moveX);

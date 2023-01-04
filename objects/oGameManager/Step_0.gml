@@ -13,9 +13,6 @@ if(_escKeyPressed)
 	}
 	else
 	{	
-		
-		if(surface_exists(pauseSurface))
-		
 		// enable them
 		event_user(0);
 		instance_activate_all();

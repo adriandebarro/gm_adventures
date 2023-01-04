@@ -13,3 +13,6 @@ slideSpeed = 4;
 moveX = 0;
 moveY = 0;
 
+bowAttackIP = false;
+swordAttackIP = false;
+
