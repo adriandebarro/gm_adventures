@@ -16,3 +16,5 @@ moveY = 0;
 bowAttackIP = false;
 swordAttackIP = false;
 
+var abstractState = new State();
+var attackState = new AttackState();

@@ -11,3 +11,8 @@ if(_paused)
 	_y += (20);
 	create_button_place_holder(_x, _y);
 }
+else
+{
+	// TODO draw the GUI on the screen 
+	// Add the timer and the amount of hearts the player has
+}
