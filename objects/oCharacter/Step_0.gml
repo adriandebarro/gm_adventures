@@ -73,7 +73,7 @@
 var _currentInput = new pressedKeys();
 
 if(currentState == noone)
-	throw ("Current Character State found to be null");
+	throw ("Current Character State found to be noone!!");
 
 var _newState = currentState.handleInput(_currentInput, oCharacter);
 
@@ -84,6 +84,7 @@ if(_newState != noone)
 	currentState.enterState(oCharacter);
 }
 
+get_character_state().updateCounters();
 
 
 

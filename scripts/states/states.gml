@@ -59,11 +59,24 @@ function pressedKeys() constructor
 		
 		_shiftPressed = keyboard_check(vk_shift);
 		_shiftReleased = keyboard_check_released(vk_shift);
+		
+		_spacePressed = keyboard_check(vk_space);
+		_spaceReleased = keyboard_check_released(vk_space);
 	}
 	
 	static isMoving = function()
 	{
 		return _leftArrowPressed || _rightArrowPressed || _upArrowPressed || _downArrowPressed;	
+	}
+	
+	static isAttacking = function()
+	{
+		return _spaceReleased;	
+	}
+	
+	static isAttackHeld = function()
+	{
+		return !_spaceReleased;	
 	}
 	
 	getPressedInput();	
@@ -90,8 +103,6 @@ function State(state) constructor
 	// 
 	static handleInput = function(_input, _character) 
 	{	
-		show_debug_message("Hello from the base playerstate");
-		// handle the input here
 		return noone;
 	}
 	
@@ -102,21 +113,23 @@ function State(state) constructor
 	}
 }
 
-function sliding() : State(PlayerFSMState.RUNNING) constructor
+function sliding(slideDuration) : State(PlayerFSMState.SLIDING) constructor
 {
-	// time taken to be able to slide again
-	counterSize = 10;
+	slideRemaining = slideDuration;
 	
 	static enterState = function(_character)
 	{
 		_character.sprite_index = sprite_player_slide;	
+		var _charState = get_character_state();
 	}
 	
 	static handleInput = function(_input, _character)
 	{
-		if((!_input._shiftPressed || counterSize == 0) && _input.isMoving())
+		var _charState = get_character_state();
+		
+		if((!_input._shiftPressed || slideRemaining <=  0) && _input.isMoving())
 		{
-			return new walking(false);
+			return new walking();
 		}
 		else
 		{
@@ -125,37 +138,35 @@ function sliding() : State(PlayerFSMState.RUNNING) constructor
 				var _inputX = _input._rightArrowPressed - _input._leftArrowPressed;
 				var _inputY = _input._downArrowPressed - _input._upArrowPressed;
 		
-				var _moveX = _inputX * _character.slideSpeed;
-				var _moveY = _inputY * _character.slideSpeed;
+				var _moveX = _inputX * _charState.getSlideSpeed();
+				var _moveY = _inputY * _charState.getSlideSpeed();
 		
 				image_xscale = sign(_moveX);
 				x += _moveX;
 				y += _moveY;
 			}
 			
-			counterSize--;	
+			slideRemaining--;
 			return noone;
 		}
 	}
 }
 
-function walking(slideFull = true) : State(PlayerFSMState.SLIDING) constructor
+function walking() : State(PlayerFSMState.SLIDING) constructor
 {
-	slideCounter = slideFull? 100 : 0;
-	
 	static enterState = function(_character)
 	{
 		_character.sprite_index = sprite_player_run;	
 	}
 	
 	static handleInput = function(_input, _character)
-	{
-		if(slideCounter < 100)
-			slideCounter++;
+	{	
+		var _charState = get_character_state();
 		
-		if(_input.isMoving() && _input._shiftPressed && slideCounter == 100)		
+		if(_input.isMoving() && _input._shiftPressed && _charState.canSlide())		
 		{
-			return new sliding();
+			_charState.clearSlidingTimer();
+			return new sliding(_charState.getSlideDuration());
 		}
 		else if(_input.isMoving())
 		{
@@ -164,13 +175,14 @@ function walking(slideFull = true) : State(PlayerFSMState.SLIDING) constructor
 				var _inputX = _input._rightArrowPressed - _input._leftArrowPressed;
 				var _inputY = _input._downArrowPressed - _input._upArrowPressed;
 		
-				var _moveX = _inputX * _character.moveSpeed;
-				var _moveY = _inputY * _character.moveSpeed;
+				var _moveX = _inputX * _charState.moveSpeed;
+				var _moveY = _inputY * _charState.moveSpeed;
 		
 				image_xscale = sign(_moveX);
 				x += _moveX;
 				y += _moveY;
 			}
+			
 			return noone;
 		}
 		else
@@ -197,8 +209,72 @@ function idle() : State(PlayerFSMState.IDLE) constructor
 		{
 			return new walking();
 		}
+		else if(_input.isAttacking())
+		{
+			return new swordAttack();
+		}
 		else
 		{
+			return noone;	
+		}
+	}
+}
+
+function swordAttack() : State(PlayerFSMState.SWORD_ATTACK) constructor
+{
+	static enterState = function(_character)
+	{		
+		with(_character)
+		{
+			sprite_index = sprite_player_attack_1;
+		}
+	}
+	
+	static handleInput = function(_input, _character)
+	{
+		var _animatioinEnded = false;
+		var _numberFrames = sprite_get_number(sprite_player_attack_1);
+		
+		with(_character)
+		{
+			_animatioinEnded = _character.image_index == _numberFrames;
+		}
+		
+		if(_animatioinEnded)
+		{
+			return new idle();
+		}
+		else
+		{
+			// check for intersection
+			return noone;	
+		}
+	}
+}
+
+function throw_arrow() : State(PlayerFSMState.SWORD_ATTACK) constructor
+{	
+	static enterState = function(_character)
+	{
+		animation_length = sprite_get_number(sprite_player_attack_1);
+		animation_remaining = animation_length;
+		
+		
+		with(_character)
+		{
+			sprite_index = sprite_player_attack_1;
+		}	
+	}
+	
+	static handleInput = function(_input, _character)
+	{
+		if(animation_remaining <=  0)
+		{
+			return new idle();
+		}
+		else
+		{
+			// check for intersection
 			return noone;	
 		}
 	}
