@@ -1,4 +1,5 @@
 currentState = new idle();
-create_character_state();
+animationEnded = false;
+init_character_elements();
 
 

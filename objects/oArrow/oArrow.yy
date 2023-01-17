@@ -1,10 +1,10 @@
 {
   "resourceType": "GMObject",
   "resourceVersion": "1.0",
-  "name": "oCharacter",
+  "name": "oArrow",
   "spriteId": {
-    "name": "sprite_player_idle",
-    "path": "sprites/sprite_player_idle/sprite_player_idle.yy",
+    "name": "sprite_arrow",
+    "path": "sprites/sprite_arrow/sprite_arrow.yy",
   },
   "solid": false,
   "visible": true,
@@ -27,12 +27,11 @@
   "eventList": [
     {"resourceType":"GMEvent","resourceVersion":"1.0","name":"","isDnD":false,"eventNum":0,"eventType":0,"collisionObjectId":null,},
     {"resourceType":"GMEvent","resourceVersion":"1.0","name":"","isDnD":false,"eventNum":0,"eventType":3,"collisionObjectId":null,},
-    {"resourceType":"GMEvent","resourceVersion":"1.0","name":"","isDnD":false,"eventNum":7,"eventType":7,"collisionObjectId":null,},
   ],
   "properties": [],
   "overriddenProperties": [],
   "parent": {
-    "name": "Objects",
-    "path": "folders/Objects.yy",
+    "name": "projectiles",
+    "path": "folders/Objects/projectiles.yy",
   },
 }

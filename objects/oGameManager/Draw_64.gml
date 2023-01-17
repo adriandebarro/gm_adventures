@@ -15,4 +15,13 @@ else
 {
 	// TODO draw the GUI on the screen 
 	// Add the timer and the amount of hearts the player has
+	
+	var _space_w = 10;
+	var _x = 50
+	var _y = 50;
+	
+		// and draw the pause menu
+	var _hitCount = get_character_state().hitCount;
+	var _title = create_button_title(_x, _y, 30, 15, string(_hitCount));
+
 }

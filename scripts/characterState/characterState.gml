@@ -2,7 +2,6 @@
 // https://help.yoyogames.com/hc/en-us/articles/360005277377 for more information
 function characterState() constructor
 {
-	
 	slidingDuration = 50;
 	slidingTimerMax = 100;
 	slidingTimer = slidingTimerMax;
@@ -12,6 +11,11 @@ function characterState() constructor
 	moveX = 0;
 	moveY = 0;
 
+	hitCount = 0;
+	
+	swordAttackRange = 1.5;
+	shootArrowRange = 10;
+	
 	//bowAttackIP = false;
 	//swordAttackIP = false;
 	
@@ -52,13 +56,12 @@ function characterState() constructor
 	{
 		global.characterState = noone;	
 	}
-	
-	
 }
 
-function create_character_state()
+function init_character_elements()
 {
 	global.characterState = new characterState();	
+	global.characterStateCache = new characterStateCache();
 }
 
 function get_character_state()
@@ -68,3 +71,14 @@ function get_character_state()
 	
 	return global.characterState;	
 }
+
+function get_state(_state)
+{
+	if(global.characterStateCache == noone)
+		throw ("States Cache not initialised yet!!");
+		
+		return global.characterStateCache.get_state(_state);
+}
+
+
+

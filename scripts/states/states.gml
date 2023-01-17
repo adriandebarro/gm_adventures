@@ -1,16 +1,5 @@
 // Script assets have changed for v2.3.0 see
 // https://help.yoyogames.com/hc/en-us/articles/360005277377 for more information
-
-enum PlayerFSMState 
-{
-	SWORD_ATTACK,
-	RUNNING,
-	WALKING,
-	SLIDING,
-	HURT,
-	IDLE
-}
-
 function pressedKeys() constructor
 {
 	_mouseX = -1;
@@ -33,6 +22,8 @@ function pressedKeys() constructor
 	
 	_shiftPressed = false;
 	_shiftReleased = false;
+	
+	_animationEnded = false;
 	
 	static getPressedInput = function()
 	{
@@ -178,7 +169,9 @@ function walking() : State(PlayerFSMState.SLIDING) constructor
 				var _moveX = _inputX * _charState.moveSpeed;
 				var _moveY = _inputY * _charState.moveSpeed;
 		
-				image_xscale = sign(_moveX);
+				if(abs(_moveX) > 0) 
+					image_xscale = sign(_moveX);
+					
 				x += _moveX;
 				y += _moveY;
 			}
@@ -207,11 +200,15 @@ function idle() : State(PlayerFSMState.IDLE) constructor
 	{
 		if(_input.isMoving())
 		{
-			return new walking();
+			return get_state(PlayerFSMState.RUNNING);
 		}
 		else if(_input.isAttacking())
 		{
-			return new swordAttack();
+			return get_state(PlayerFSMState.SWORD_ATTACK);
+		}
+		else if(_input._lmPressed)
+		{
+			return get_state(PlayerFSMState.ARROW_ATTACK);
 		}
 		else
 		{
@@ -242,7 +239,7 @@ function swordAttack() : State(PlayerFSMState.SWORD_ATTACK) constructor
 		
 		if(_animatioinEnded)
 		{
-			return new idle();
+			return  get_state(PlayerFSMState.IDLE);
 		}
 		else
 		{
@@ -252,25 +249,45 @@ function swordAttack() : State(PlayerFSMState.SWORD_ATTACK) constructor
 	}
 }
 
-function throw_arrow() : State(PlayerFSMState.SWORD_ATTACK) constructor
+function shootArrow() : State(PlayerFSMState.ARROW_ATTACK) constructor
 {	
 	static enterState = function(_character)
 	{
-		animation_length = sprite_get_number(sprite_player_attack_1);
+		animation_length = sprite_get_number(sprite_player_bow_attack);
 		animation_remaining = animation_length;
-		
 		
 		with(_character)
 		{
-			sprite_index = sprite_player_attack_1;
+			sprite_index = sprite_player_bow_attack;
 		}	
 	}
 	
 	static handleInput = function(_input, _character)
 	{
-		if(animation_remaining <=  0)
+		var _animationEnded = false;
+		var _numberFrames = sprite_get_number(sprite_player_bow_attack);	
+		if(_input._animationEnded)
 		{
-			return new idle();
+			var _disX = mouse_x - oCharacter.x;
+			var _disY = mouse_y - oCharacter.y;
+			
+			var _len = sqrt(_disX * _disX + _disY * _disY);
+			
+			var _dirX = _disX / _len;
+			var _dirY = _disY / _len;
+			
+			// TODO spawn projectile here!
+			var instance = instance_create_layer(oCharacter.x, oCharacter.y, "Instances", oArrow);
+			with(instance)
+			{
+				startPosX = oCharacter.x;
+				startPosY = oCharacter.y;
+				
+				dirX = _dirX;
+				dirY = _dirY;
+			}
+			
+			return get_state(PlayerFSMState.IDLE);
 		}
 		else
 		{
